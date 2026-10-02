@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Inner Weather Check | Holistic Recode</title>
+  <style>
+    :root {
+      --primary: #2B6CB0;
+      --primary-light: #EBF8FF;
+      --accent: #319795;
+      --dark: #2D3748;
+      --light-gray: #F7FAFC;
+      --border: #E2E8F0;
+      --alert-bg: #FFF5F5;
+      --alert-border: #FEB2B2;
+      --alert-text: #9B2C2C;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
+    body { background-color: #F0F4F8; color: var(--dark); margin: 0; padding: 20px; }
+    .container { max-width: 860px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); padding: 36px; }
+    
+    /* Branding */
+    .brand-header { text-align: center; border-bottom: 2px solid var(--primary-light); padding-bottom: 24px; margin-bottom: 28px; }
+    .brand-title { font-size: 14px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+    .tool-title { font-size: 28px; color: var(--primary); margin: 0 0 10px 0; }
+    .subtitle { font-size: 15px; color: #718096; margin: 0; }
+
+    /* Client Info */
+    .client-info-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; background: var(--primary-light); padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+    .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
+    .input-group input { width: 100%; padding: 10px; border: 1px solid #CBD5E0; border-radius: 6px; font-size: 15px; }
+
+    /* Instructions */
+    .intro-card { background: #FAF5FF; border-left: 4px solid #9F7AEA; padding: 14px 18px; border-radius: 4px; margin-bottom: 30px; font-size: 14px; line-height: 1.5; }
+
+    /* Sections & Items */
+    .section-block { margin-bottom: 36px; }
+    .section-title { font-size: 19px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 16px; }
+    .question-item { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dotted var(--border); }
+    .question-text { font-size: 15px; margin-bottom: 8px; }
+    .options-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .options-row label { font-size: 13px; background: var(--light-gray); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+    .options-row label:hover { background: #EDF2F7; }
+    .options-row input { margin-right: 6px; }
+
+    /* Checkbox & Text fields */
+    .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+    .checkbox-grid label { font-size: 14px; display: flex; align-items: center; gap: 6px; }
+    .text-response-block { margin-top: 16px; }
+    .text-response-block label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .text-response-block textarea, .text-response-block input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+
+    /* Safety Alert Section */
+    .safety-block { background: var(--alert-bg); border: 1px solid var(--alert-border); border-radius: 8px; padding: 20px; margin: 30px 0; }
+    .safety-block h3 { color: var(--alert-text); margin-top: 0; font-size: 16px; }
+
+    /* Report Card */
+    #reportSection { display: none; margin-top: 40px; border-top: 2px dashed var(--primary); padding-top: 30px; }
+    .report-card { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 28px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 20px 0; }
+    .metric-item { background: var(--light-gray); padding: 16px; border-radius: 8px; border-left: 4px solid var(--primary); }
+    .metric-name { font-size: 13px; color: #718096; font-weight: 600; text-transform: uppercase; }
+    .metric-val { font-size: 20px; font-weight: bold; color: var(--dark); margin: 6px 0; }
+    .metric-eval { font-size: 12px; color: #4A5568; line-height: 1.4; }
+
+    .btn-action { display: block; width: 100%; background: var(--primary); color: white; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+    .btn-action:hover { background: #2B579A; }
+    .btn-print { background: var(--accent); margin-top: 15px; }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+      #assessmentForm, .btn-action, .btn-print { display: none; }
+      #reportSection { display: block !important; border: none; padding-top: 0; margin-top: 0; }
+      .report-card { border: 1px solid #CBD5E0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand-header">
+    <div class="brand-title">Holistic Recode</div>
+    <h1 class="tool-title">The Inner Weather Check</h1>
+    <p class="subtitle">A gentle check-in to understand what’s happening beneath the surface.</p>
+  </div>
+
+  <form id="assessmentForm">
+    <!-- Client Info -->
+    <div class="client-info-grid">
+      <div class="input-group">
+        <label for="clientName">Full Name</label>
+        <input type="text" id="clientName" required placeholder="Enter student's name" />
+      </div>
+      <div class="input-group">
+        <label for="sessionDate">Session Date</label>
+        <input type="date" id="sessionDate" required />
+      </div>
+    </div>
+
+    <div class="intro-card">
+      <strong>Remember:</strong> There are no right or wrong answers. This isn’t a test, and your answers don't make you "good" or "bad." Choose what feels closest to how you’ve been feeling during the last 2 weeks.<br/>
+      <strong>Scale:</strong> A = Almost never | B = Sometimes | C = Often | D = Almost always
+    </div>
+
+    <div id="dynamicQuestions"></div>
+
+    <!-- Section 6 Distraction Specifics -->
+    <div class="section-block">
+      <h2 class="section-title">6b. Common Distractions & Escapes</h2>
+      <label style="font-size: 14px;">Select your most common forms of distraction:</label>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="distractions" value="Phone/social media"> Phone/social media</label>
+        <label><input type="checkbox" name="distractions" value="Gaming"> Gaming</label>
+        <label><input type="checkbox" name="distractions" value="YouTube/Netflix/OTT"> YouTube/Netflix/OTT</label>
+        <label><input type="checkbox" name="distractions" value="Music/headphones"> Music/headphones</label>
+        <label><input type="checkbox" name="distractions" value="Food/snacking"> Food/snacking</label>
+        <label><input type="checkbox" name="distractions" value="Sleeping"> Sleeping</label>
+        <label><input type="checkbox" name="distractions" value="Talking/messaging"> Talking/messaging</label>
+        <label><input type="checkbox" name="distractions" value="Studying/keeping busy"> Studying/keeping busy</label>
+        <label><input type="checkbox" name="distractions" value="Sports/activity"> Sports/activity</label>
+        <label><input type="checkbox" name="distractions" value="Being alone"> Being alone</label>
+      </div>
+    </div>
+
+    <!-- Weather Metaphor -->
+    <div class="section-block">
+      <h2 class="section-title">Today's Weather State</h2>
+      <label style="font-size: 14px;">If your feelings were today's weather, what would they be?</label>
+      <div class="options-row" style="margin-top: 10px;">
+        <label><input type="radio" name="currentWeather" value="Sunny" required> ☀️ Sunny (Mostly good & peaceful)</label>
+        <label><input type="radio" name="currentWeather" value="Partly Cloudy"> ⛅ Partly Cloudy (Okay, but some things bother me)</label>
+        <label><input type="radio" name="currentWeather" value="Cloudy"> ☁️ Cloudy (Carrying quite a lot lately)</label>
+        <label><input type="radio" name="currentWeather" value="Rainy"> 🌧️ Rainy (Emotionally heavy or overwhelmed)</label>
+        <label><input type="radio" name="currentWeather" value="Stormy"> ⛈️ Stormy (Very difficult right now)</label>
+        <label><input type="radio" name="currentWeather" value="Changing Weather"> 🌦️ Changing (Mixed feelings across life)</label>
+      </div>
+
+      <div style="margin-top: 18px;">
+        <label style="font-size: 14px;">What is creating the biggest cloud in your life right now?</label>
+        <div class="checkbox-grid">
+          <label><input type="checkbox" name="clouds" value="School/studies"> School/studies</label>
+          <label><input type="checkbox" name="clouds" value="Exams/marks"> Exams/marks</label>
+          <label><input type="checkbox" name="clouds" value="Parents/family"> Parents/family</label>
+          <label><input type="checkbox" name="clouds" value="Friends"> Friends</label>
+          <label><input type="checkbox" name="clouds" value="Feeling left out"> Feeling left out</label>
+          <label><input type="checkbox" name="clouds" value="Self-confidence"> Self-confidence</label>
+          <label><input type="checkbox" name="clouds" value="Social media"> Social media</label>
+          <label><input type="checkbox" name="clouds" value="Future/career"> Future/career</label>
+          <label><input type="checkbox" name="clouds" value="Sleep"> Sleep</label>
+          <label><input type="checkbox" name="clouds" value="Body/health worries"> Body/health</label>
+          <label><input type="checkbox" name="clouds" value="Loneliness"> Loneliness</label>
+          <label><input type="checkbox" name="clouds" value="Anger"> Anger</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Qualitative Insights -->
+    <div class="section-block">
+      <h2 class="section-title">Support & Qualitative Insights</h2>
+      <div class="text-response-block">
+        <label>One person I feel safest talking to:</label>
+        <input type="text" id="safePerson" />
+      </div>
+      <div class="text-response-block">
+        <label>What I wish adults understood about me:</label>
+        <textarea id="wishUnderstood" rows="2"></textarea>
+      </div>
+      <div class="text-response-block">
+        <label>One thing that's actually going well in my life:</label>
+        <textarea id="goingWell" rows="2"></textarea>
+      </div>
+      <div class="text-response-block">
+        <label>One thing that helps me feel calm:</label>
+        <textarea id="calmThing" rows="2"></textarea>
+      </div>
+    </div>
+
+    <!-- Safety Check -->
+    <div class="safety-block">
+      <h3>Gentle Safety Check</h3>
+      <p style="font-size: 13px; line-height: 1.4;">Sometimes when people feel very overwhelmed, they may feel like hurting themselves, disappearing, or not wanting to be here. Have you been having thoughts like that?</p>
+      <div class="options-row">
+        <label><input type="radio" name="safetyCheck" value="No" required> No</label>
+        <label><input type="radio" name="safetyCheck" value="Sometimes"> Sometimes</label>
+        <label><input type="radio" name="safetyCheck" value="Often"> Often</label>
+        <label><input type="radio" name="safetyCheck" value="PreferNotToSay"> I don't want to answer</label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-action">Generate Assessment Report</button>
+  </form>
+
+  <!-- Dynamic Output Report -->
+  <div id="reportSection">
+    <div class="report-card">
+      <div class="brand-header">
+        <div class="brand-title">Holistic Recode • Assessment Report</div>
+        <h2 id="reportClientTitle" style="color: var(--primary); margin: 6px 0;">Client Report</h2>
+        <div id="reportSessionDate" style="font-size: 13px; color: #718096;"></div>
+      </div>
+
+      <div id="safetyBanner" style="display: none; background: #FFF5F5; border: 1px solid #E53E3E; color: #C53030; padding: 14px; border-radius: 8px; margin-bottom: 20px;">
+        <strong>Safety Consideration Flagged:</strong> The young person indicated experiencing thoughts of self-harm, disappearing, or chose to withhold response. Prompt supportive engagement with a trusted adult or mental health professional is recommended.
+      </div>
+
+      <div style="background: var(--primary-light); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 6px 0; color: var(--primary); font-size: 16px;">Current Weather State</h3>
+        <p style="margin: 0; font-size: 15px;" id="reportWeatherSummary"></p>
+      </div>
+
+      <h3 style="font-size: 16px; color: var(--dark); border-bottom: 1px solid var(--border); padding-bottom: 6px;">Dimension Profile</h3>
+      <div class="metric-grid" id="metricsDisplay"></div>
+
+      <div style="margin-top: 24px; font-size: 14px; line-height: 1.6;">
+        <h4 style="margin-bottom: 6px; color: var(--primary);">Personal Reflections</h4>
+        <p><strong>Safest person to talk to:</strong> <span id="rSafePerson"></span></p>
+        <p><strong>What they wish adults understood:</strong> <span id="rWishUnderstood"></span></p>
+        <p><strong>What is going well:</strong> <span id="rGoingWell"></span></p>
+        <p><strong>What brings calm:</strong> <span id="rCalm"></span></p>
+        <p><strong>Identified main stressors:</strong> <span id="rClouds"></span></p>
+      </div>
+
+      <button onclick="window.print()" class="btn-action btn-print">Print / Save PDF Report</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set current date by default
+  document.getElementById('sessionDate').valueAsDate = new Date();
+
+  // Questions Database
+  const questions = [
+    // 1. Mental Load (1-5)
+    { id: 1, text: "My mind keeps thinking about things even when I want to relax.", cat: "mental" },
+    { id: 2, text: "I worry about things that might happen in the future.", cat: "mental" },
+    { id: 3, text: "I keep replaying something that happened earlier.", cat: "mental" },
+    { id: 4, text: "I find it difficult to concentrate on studies, conversations, or activities.", cat: "mental" },
+    { id: 5, text: "Sometimes my brain feels so full that I don't know what to think about first.", cat: "mental" },
+
+    // 2. Emotional Load (6-11)
+    { id: 6, text: "I get irritated or angry more easily than usual.", cat: "emotional" },
+    { id: 7, text: "I sometimes feel sad without knowing exactly why.", cat: "emotional" },
+    { id: 8, text: "I keep my feelings inside instead of talking about them.", cat: "emotional" },
+    { id: 9, text: "I feel overwhelmed by my emotions.", cat: "emotional" },
+    { id: 10, text: "Sometimes I feel like saying, 'Nobody really understands what I'm going through.'", cat: "emotional" },
+    { id: 11, text: "I find it difficult to calm myself once I become upset.", cat: "emotional" },
+
+    // 3. School & Performance Pressure (12-17) -> Life & Rel
+    { id: 12, text: "I feel pressure to get good marks or perform well.", cat: "lifeRel" },
+    { id: 13, text: "I worry about disappointing my parents, teachers, or others.", cat: "lifeRel" },
+    { id: 14, text: "I feel that I should always be doing something productive.", cat: "lifeRel" },
+    { id: 15, text: "Schoolwork or exams stay on my mind even when I'm supposed to be relaxing.", cat: "lifeRel" },
+    { id: 16, text: "I compare my performance with other students.", cat: "lifeRel" },
+    { id: 17, text: "I feel stressed when I think about my future.", cat: "lifeRel" },
+
+    // 4. Home & Family (18-24)
+    { id: 18, text: "I feel safe talking about my feelings at home.", cat: "homeSupport", rev: true },
+    { id: 19, text: "When something is bothering me, someone at home listens to me without judging or correcting.", cat: "homeSupport", rev: true },
+    { id: 20, text: "I feel emotionally supported by my family.", cat: "homeSupport", rev: true },
+    { id: 21, text: "I feel comfortable asking my family for help.", cat: "homeSupport", rev: true },
+    { id: 22, text: "I sometimes feel that I have to hide my feelings at home.", cat: "lifeRel" },
+    { id: 23, text: "I feel that people at home expect a lot from me.", cat: "lifeRel" },
+    { id: 24, text: "I sometimes feel alone even when I'm surrounded by family.", cat: "lifeRel" },
+
+    // 5. Friends & Relationships (25-31)
+    { id: 25, text: "I feel comfortable being myself around my friends.", cat: "friendSupport", rev: true },
+    { id: 26, text: "I worry about what other people think about me.", cat: "lifeRel" },
+    { id: 27, text: "I feel left out, ignored, or excluded sometimes.", cat: "lifeRel" },
+    { id: 28, text: "I compare myself with my friends or people I see online.", cat: "lifeRel" },
+    { id: 29, text: "I find it difficult to say no when my friends want me to do something.", cat: "lifeRel" },
+    { id: 30, text: "I worry about losing friendships or upsetting people.", cat: "lifeRel" },
+    { id: 31, text: "There is someone I wish I could talk to openly but don't know how.", cat: "lifeRel" },
+
+    // 6. Coping & Distraction (32-41)
+    { id: 32, text: "Scroll Instagram, YouTube, Shorts, Reels, etc. when uncomfortable.", cat: "coping" },
+    { id: 33, text: "Play games for a long time to escape uncomfortable feelings.", cat: "coping" },
+    { id: 34, text: "Watch videos, movies, or shows to avoid thinking about something.", cat: "coping" },
+    { id: 35, text: "Keep chatting or messaging so I don't have to be alone with my thoughts.", cat: "coping" },
+    { id: 36, text: "Listen to music constantly so I don't have to think.", cat: "coping" },
+    { id: 37, text: "Eat, snack, or look for food even when not really hungry.", cat: "coping" },
+    { id: 38, text: "Sleep or stay in bed to escape from things.", cat: "coping" },
+    { id: 39, text: "Keep myself busy with chores/work so I don't have to think about feelings.", cat: "coping" },
+    { id: 40, text: "Avoid talking about the thing that's bothering me.", cat: "coping" },
+    { id: 41, text: "Keep doing something repeatedly because being quiet feels uncomfortable.", cat: "coping" },
+
+    // 7. Body Stress Signals (42-47)
+    { id: 42, text: "I feel tired even after sleeping.", cat: "body" },
+    { id: 43, text: "I have difficulty falling asleep or staying asleep.", cat: "body" },
+    { id: 44, text: "I notice headaches, stomach discomfort, or muscle tension when stressed.", cat: "body" },
+    { id: 45, text: "My body feels restless or tense.", cat: "body" },
+    { id: 46, text: "I sometimes feel like I need a break but keep pushing myself.", cat: "body" },
+    { id: 47, text: "My eating or sleeping habits change when I'm stressed.", cat: "body" },
+
+    // 8. Self-Pressure (48-54)
+    { id: 48, text: "I am very hard on myself when I make mistakes.", cat: "selfPressure" },
+    { id: 49, text: "I compare myself with others and feel I'm not good enough.", cat: "selfPressure" },
+    { id: 50, text: "I feel guilty when I'm not being productive.", cat: "selfPressure" },
+    { id: 51, text: "I find it difficult to ask for help.", cat: "selfPressure" },
+    { id: 52, text: "I feel that I need to handle things on my own.", cat: "selfPressure" },
+    { id: 53, text: "I notice the things I do wrong more than things I do well.", cat: "selfPressure" },
+    { id: 54, text: "I give myself enough time to relax and enjoy things I like.", cat: "selfPressure", rev: true },
+
+    // 9. Positive Weather / Protective Factors (55-60)
+    { id: 55, text: "I have at least one person I can talk to when something is bothering me.", cat: "protective", positive: true },
+    { id: 56, text: "I have activities that genuinely make me happy.", cat: "protective", positive: true },
+    { id: 57, text: "I get enough time to play, relax, or do things I enjoy.", cat: "protective", positive: true },
+    { id: 58, text: "I feel accepted for who I am.", cat: "protective", positive: true },
+    { id: 59, text: "I have moments when I feel peaceful and relaxed.", cat: "protective", positive: true },
+    { id: 60, text: "I know at least a few things that help me feel better when stressed.", cat: "protective", positive: true }
+  ];
+
+  // Render Questions
+  const container = document.getElementById('dynamicQuestions');
+  let currentCat = '';
+  questions.forEach(q => {
+    const div = document.createElement('div');
+    div.className = 'question-item';
+    div.innerHTML = `
+      <div class="question-text"><strong>${q.id}.</strong> ${q.text}</div>
+      <div class="options-row">
+        <label><input type="radio" name="q${q.id}" value="0" required> Almost never</label>
+        <label><input type="radio" name="q${q.id}" value="1"> Sometimes</label>
+        <label><input type="radio" name="q${q.id}" value="2"> Often</label>
+        <label><input type="radio" name="q${q.id}" value="3"> Almost always</label>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  // Calculate & Generate Report
+  document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const clientName = document.getElementById('clientName').value.trim();
+    const sessionDate = document.getElementById('sessionDate').value;
+    
+    // Dynamic page title so PDF print saves with Client's Name
+    document.title = `Holistic Recode - Inner Weather Report - ${clientName}`;
+
+    // Compute Dimension Totals
+    const scores = {
+      mental: 0, mentalMax: 15,
+      emotional: 0, emotionalMax: 18,
+      lifeRel: 0, lifeRelMax: 45, // 6 school + 3 home + 6 friend
+      coping: 0, copingMax: 30,
+      body: 0, bodyMax: 18,
+      selfPressure: 0, selfPressureMax: 21,
+      protective: 0, protectiveMax: 18
+    };
+
+    questions.forEach(q => {
+      let rawVal = parseInt(document.querySelector(`input[name="q${q.id}"]:checked`).value);
+      let val = rawVal;
+      
+      // Reverse scoring logic
+      if (q.rev) {
+        val = 3 - rawVal;
+      }
+
+      if (q.cat === 'mental') scores.mental += val;
+      else if (q.cat === 'emotional') scores.emotional += val;
+      else if (q.cat === 'lifeRel') scores.lifeRel += val;
+      else if (q.cat === 'coping') scores.coping += val;
+      else if (q.cat === 'body') scores.body += val;
+      else if (q.cat === 'selfPressure') scores.selfPressure += val;
+      else if (q.cat === 'protective') scores.protective += val;
+    });
+
+    // Populate Report Details
+    document.getElementById('reportClientTitle').innerText = `${clientName}'s Inner Weather Report`;
+    document.getElementById('reportSessionDate').innerText = `Completed on: ${sessionDate}`;
+
+    const weatherVal = document.querySelector('input[name="currentWeather"]:checked').value;
+    document.getElementById('reportWeatherSummary').innerText = `Self-Described Climate: ${weatherVal}`;
+
+    // Safety Alert Flag
+    const safetyVal = document.querySelector('input[name="safetyCheck"]:checked').value;
+    const safetyBanner = document.getElementById('safetyBanner');
+    if (safetyVal !== 'No') {
+      safetyBanner.style.display = 'block';
+    } else {
+      safetyBanner.style.display = 'none';
+    }
+
+    // Helper qualitative descriptor (supportive instead of diagnostic labels)
+    function describeLoad(score, max) {
+      const pct = score / max;
+      if (pct < 0.35) return "Light & Manageable";
+      if (pct < 0.70) return "Carrying moderate weight";
+      return "Heavy load right now";
+    }
+
+    function describeProtective(score, max) {
+      const pct = score / max;
+      if (pct < 0.40) return "Needs replenishing";
+      if (pct < 0.75) return "Healthy grounding present";
+      return "Strong protective buffers";
+    }
+
+    const metrics = [
+      { name: "Mental Load", score: scores.mental, max: scores.mentalMax, eval: describeLoad(scores.mental, scores.mentalMax) },
+      { name: "Emotional Load", score: scores.emotional, max: scores.emotionalMax, eval: describeLoad(scores.emotional, scores.emotionalMax) },
+      { name: "Life & Relational Load", score: scores.lifeRel, max: scores.lifeRelMax, eval: describeLoad(scores.lifeRel, scores.lifeRelMax) },
+      { name: "Coping & Avoidance", score: scores.coping, max: scores.copingMax, eval: describeLoad(scores.coping, scores.copingMax) },
+      { name: "Body Stress Signals", score: scores.body, max: scores.bodyMax, eval: describeLoad(scores.body, scores.bodyMax) },
+      { name: "Self-Pressure Pattern", score: scores.selfPressure, max: scores.selfPressureMax, eval: describeLoad(scores.selfPressure, scores.selfPressureMax) },
+      { name: "Protective Resources", score: scores.protective, max: scores.protectiveMax, eval: describeProtective(scores.protective, scores.protectiveMax) }
+    ];
+
+    const metricsContainer = document.getElementById('metricsDisplay');
+    metricsContainer.innerHTML = '';
+    metrics.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'metric-item';
+      card.innerHTML = `
+        <div class="metric-name">${m.name}</div>
+        <div class="metric-val">${m.score} / ${m.max}</div>
+        <div class="metric-eval">${m.eval}</div>
+      `;
+      metricsContainer.appendChild(card);
+    });
+
+    // Populate qualitative texts
+    document.getElementById('rSafePerson').innerText = document.getElementById('safePerson').value || "None specified";
+    document.getElementById('rWishUnderstood').innerText = document.getElementById('wishUnderstood').value || "None provided";
+    document.getElementById('rGoingWell').innerText = document.getElementById('goingWell').value || "None provided";
+    document.getElementById('rCalm').innerText = document.getElementById('calmThing').value || "None provided";
+
+    const cloudsChecked = Array.from(document.querySelectorAll('input[name="clouds"]:checked')).map(el => el.value);
+    document.getElementById('rClouds').innerText = cloudsChecked.length > 0 ? cloudsChecked.join(', ') : "None selected";
+
+    // Show report and scroll
+    const reportElem = document.getElementById('reportSection');
+    reportElem.style.display = 'block';
+    reportElem.scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
