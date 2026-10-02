@@ -12,9 +12,6 @@
       --dark: #2D3748;
       --light-gray: #F7FAFC;
       --border: #E2E8F0;
-      --alert-bg: #FFF5F5;
-      --alert-border: #FEB2B2;
-      --alert-text: #9B2C2C;
     }
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif; }
     body { background-color: #F0F4F8; color: var(--dark); margin: 0; padding: 20px; }
@@ -50,10 +47,6 @@
     .text-response-block { margin-top: 16px; }
     .text-response-block label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
     .text-response-block textarea, .text-response-block input[type="text"] { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
-
-    /* Safety Alert Section */
-    .safety-block { background: var(--alert-bg); border: 1px solid var(--alert-border); border-radius: 8px; padding: 20px; margin: 30px 0; }
-    .safety-block h3 { color: var(--alert-text); margin-top: 0; font-size: 16px; }
 
     /* Report Card */
     #reportSection { display: none; margin-top: 40px; border-top: 2px dashed var(--primary); padding-top: 30px; }
@@ -156,7 +149,7 @@
       </div>
     </div>
 
-    <!-- Qualitative Insights -->
+    <!-- Support & Qualitative Insights -->
     <div class="section-block">
       <h2 class="section-title">Support & Qualitative Insights</h2>
       <div class="text-response-block">
@@ -177,18 +170,6 @@
       </div>
     </div>
 
-    <!-- Safety Check -->
-    <div class="safety-block">
-      <h3>Gentle Safety Check</h3>
-      <p style="font-size: 13px; line-height: 1.4;">Sometimes when people feel very overwhelmed, they may feel like hurting themselves, disappearing, or not wanting to be here. Have you been having thoughts like that?</p>
-      <div class="options-row">
-        <label><input type="radio" name="safetyCheck" value="No" required> No</label>
-        <label><input type="radio" name="safetyCheck" value="Sometimes"> Sometimes</label>
-        <label><input type="radio" name="safetyCheck" value="Often"> Often</label>
-        <label><input type="radio" name="safetyCheck" value="PreferNotToSay"> I don't want to answer</label>
-      </div>
-    </div>
-
     <button type="submit" class="btn-action">Generate Assessment Report</button>
   </form>
 
@@ -199,10 +180,6 @@
         <div class="brand-title">Holistic Recode • Assessment Report</div>
         <h2 id="reportClientTitle" style="color: var(--primary); margin: 6px 0;">Client Report</h2>
         <div id="reportSessionDate" style="font-size: 13px; color: #718096;"></div>
-      </div>
-
-      <div id="safetyBanner" style="display: none; background: #FFF5F5; border: 1px solid #E53E3E; color: #C53030; padding: 14px; border-radius: 8px; margin-bottom: 20px;">
-        <strong>Safety Consideration Flagged:</strong> The young person indicated experiencing thoughts of self-harm, disappearing, or chose to withhold response. Prompt supportive engagement with a trusted adult or mental health professional is recommended.
       </div>
 
       <div style="background: var(--primary-light); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
@@ -248,7 +225,7 @@
     { id: 10, text: "Sometimes I feel like saying, 'Nobody really understands what I'm going through.'", cat: "emotional" },
     { id: 11, text: "I find it difficult to calm myself once I become upset.", cat: "emotional" },
 
-    // 3. School & Performance Pressure (12-17) -> Life & Rel
+    // 3. School & Performance Pressure (12-17)
     { id: 12, text: "I feel pressure to get good marks or perform well.", cat: "lifeRel" },
     { id: 13, text: "I worry about disappointing my parents, teachers, or others.", cat: "lifeRel" },
     { id: 14, text: "I feel that I should always be doing something productive.", cat: "lifeRel" },
@@ -314,7 +291,6 @@
 
   // Render Questions
   const container = document.getElementById('dynamicQuestions');
-  let currentCat = '';
   questions.forEach(q => {
     const div = document.createElement('div');
     div.className = 'question-item';
@@ -343,7 +319,7 @@
     const scores = {
       mental: 0, mentalMax: 15,
       emotional: 0, emotionalMax: 18,
-      lifeRel: 0, lifeRelMax: 45, // 6 school + 3 home + 6 friend
+      lifeRel: 0, lifeRelMax: 45,
       coping: 0, copingMax: 30,
       body: 0, bodyMax: 18,
       selfPressure: 0, selfPressureMax: 21,
@@ -375,16 +351,7 @@
     const weatherVal = document.querySelector('input[name="currentWeather"]:checked').value;
     document.getElementById('reportWeatherSummary').innerText = `Self-Described Climate: ${weatherVal}`;
 
-    // Safety Alert Flag
-    const safetyVal = document.querySelector('input[name="safetyCheck"]:checked').value;
-    const safetyBanner = document.getElementById('safetyBanner');
-    if (safetyVal !== 'No') {
-      safetyBanner.style.display = 'block';
-    } else {
-      safetyBanner.style.display = 'none';
-    }
-
-    // Helper qualitative descriptor (supportive instead of diagnostic labels)
+    // Qualitative descriptors
     function describeLoad(score, max) {
       const pct = score / max;
       if (pct < 0.35) return "Light & Manageable";
